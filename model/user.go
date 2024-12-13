@@ -18,6 +18,7 @@ type User struct {
 	Password  string          `grom:"type:varchar(50)" json:"password" binding:"required,min=8"`
 	CreatedAt time.Time       `gorm:"autoCreateTime"`
 	UpdatedAt time.Time       `gorm:"autoUpdateTime"`
+	Role	string	`	\gorm:"type:varchar(255)" json:"role" binding:"required"`
 	DeletedAt *gorm.DeletedAt `gorm:"index"`
 }
 
