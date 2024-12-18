@@ -1,31 +1,29 @@
-package authservice
+package service
 
 import (
+	"errors"
 	"project_pos_app/model"
-	"project_pos_app/repository"
 
-	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
-type AuthService interface {
-	Login(login *model.Login, ipAddress string) (*model.Session, string, error)
+type AuthService struct {
+	DB *gorm.DB
 }
 
-type authService struct {
-	repo *repository.AllRepository
-	log  *zap.Logger
-}
-
-func NewManagementVoucherService(repo *repository.AllRepository, log *zap.Logger) AuthService {
-	return &authService{repo, log}
-}
-
-func (as *authService) Login(login *model.Login, ipAddress string) (*model.Session, string, error) {
-
-	session, idKey, err := as.repo.Auth.Login(login, ipAddress)
-	if err != nil {
-		return nil, "", err
+func (a *AuthService) ValidateUser(email, password string) (*model.User, error) {
+	user := &model.User{}
+	// Query user berdasarkan email
+	if err := a.DB.Where("email = ?", email).First(user).Error; err != nil {
+		return nil, errors.New("user not found")
 	}
 
-	return session, idKey, nil
+	// Bandingkan password yang di-hash
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, errors.New("invalid password")
+	}
+
+	return user, nil
 }
