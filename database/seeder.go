@@ -69,10 +69,13 @@ func getTableName(seed interface{}) string {
 	}
 	return ""
 }
-
 func dataSeeds() []interface{} {
 	return []interface{}{
-		model.NotificationSeed(),
+		model.SeedCategories(),
 		model.UserSeed(),
+		model.NotificationSeed(),
+		model.SeedProducts(),
+		model.SeedOrderProducts(),
+		model.SeedOrders(),
 	}
 }

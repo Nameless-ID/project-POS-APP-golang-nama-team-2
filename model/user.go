@@ -3,6 +3,7 @@ package model
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 	"log"
 	"project_pos_app/utils"
 	"time"
@@ -17,12 +18,12 @@ type Login struct {
 
 type User struct {
 	ID        int             `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name      string          `grom:"type:varchar(100)" json:"name" binding:"required"`
-	Email     string          `grom:"type:varchar(255);unique" json:"email" binding:"required,email"`
-	Password  string          `grom:"type:varchar(50)" json:"password" binding:"required,min=8"`
+	Name      string          `gorm:"type:varchar(100)" json:"name" binding:"required"`
+	Email     string          `gorm:"type:varchar(255);unique" json:"email" binding:"required,email"`
+	Password  string          `gorm:"type:varchar(255)" json:"password" binding:"required,min=8"`
+	Role      string          `gorm:"type:varchar(255)" json:"role" binding:"required"`
 	CreatedAt time.Time       `gorm:"autoCreateTime"`
 	UpdatedAt time.Time       `gorm:"autoUpdateTime"`
-	Role      string          `gorm:"type:varchar(255)" json:"role" binding:"required"`
 	DeletedAt *gorm.DeletedAt `gorm:"index"`
 }
 
@@ -34,11 +35,17 @@ type Session struct {
 	LastActivity time.Time `gorm:"not null"`
 }
 
-// UserSeed generates initial user data for Super Admin
-func UserSeed() interface{} {
-	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048) // Generate RSA Key
-	password := "superadmin123"                         // Default password for Super Admin
+// UserSeed generates initial user data for seeding (without database operations)
+func UserSeed() *User {
+	// Generate RSA Key
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Fatalf("Failed to generate RSA key: %v", err)
+	}
 
+	password := "superadmin123" // Default password for Super Admin
+
+	// Hash the password
 	hashedPassword, err := utils.GeneratePassword(password, privateKey)
 	if err != nil {
 		log.Fatalf("Error hashing password for seeder: %v", err)
@@ -49,5 +56,18 @@ func UserSeed() interface{} {
 		Email:    "superadmin@example.com",
 		Password: hashedPassword,
 		Role:     "super_admin",
+	}
+}
+
+// SeedSuperAdmin seeds the Super Admin data into the database
+func SeedSuperAdmin(db *gorm.DB) {
+	// Get Super Admin user data
+	superAdmin := UserSeed()
+
+	// Check or Insert Super Admin into the database
+	if err := db.FirstOrCreate(&superAdmin, User{Email: superAdmin.Email}).Error; err != nil {
+		fmt.Printf("Failed to seed Super Admin: %v\n", err)
+	} else {
+		fmt.Println("Super Admin seeded successfully")
 	}
 }
