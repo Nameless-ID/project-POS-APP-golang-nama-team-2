@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 	"net/http"
-	"project_pos_app/utils"
-	"time"
+	"project_pos_app/helper"
+	// "time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -40,7 +40,7 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	}
 
 	// Hash password baru
-	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	hashedPassword, err := helper.HashPassword(req.NewPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
@@ -93,10 +93,4 @@ func (h *AuthHandler) updatePassword(email, hashedPassword string) error {
 		return gorm.ErrRecordNotFound // Email tidak ditemukan
 	}
 	return nil
-}
-
-// User adalah representasi tabel pengguna di database
-type User struct {
-	Email    string `gorm:"primaryKey"`
-	Password string
 }

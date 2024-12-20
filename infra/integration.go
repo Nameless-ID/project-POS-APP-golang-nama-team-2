@@ -2,6 +2,7 @@ package infra
 
 import (
 	// "project_pos_app/config"
+	"project_pos_app/config"
 	"project_pos_app/controller"
 	"project_pos_app/database"
 	"project_pos_app/helper"

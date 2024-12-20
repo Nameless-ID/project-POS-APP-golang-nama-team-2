@@ -1,14 +1,91 @@
 package config
 
 import (
-	"github.com/go-redis/redis/v8"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
-// NewRedisClient menginisialisasi koneksi Redis
-func NewRedisClient() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Ganti dengan alamat Redis Anda
-		Password: "",               // Ganti jika Redis memerlukan password
-		DB:       0,                // Gunakan database default (0)
-	})
+type Config struct {
+	AppName      string
+	Port         string
+	Debug        bool
+	Migration    bool
+	Seeder       bool
+	Database     Database
+	Redis        Redis
+	ProfitMargin float64
+	LowStock     int
+}
+
+type Database struct {
+	DBName         string
+	DBHost         string
+	DBPort         string
+	DBUser         string
+	DBPassword     string
+	DBConnection   int
+	DBTimezone     string
+	DBMaxIdleConst int
+	DBMaxOpenConst int
+	DBMaxIdleTime  int
+	DBMaxLifeTime  int
+}
+
+type Redis struct {
+	Url      string
+	Password string
+	Prefix   string
+}
+
+func SetConfig() (Config, error) {
+
+	log := zap.Logger{}
+	setEnv := viper.New()
+	setEnv.SetConfigType("dotenv")
+	viper.SetConfigFile(".env")
+
+	viper.SetDefault("DBHost", "localhost")
+	viper.SetDefault("DBPort", "5432")
+	viper.SetDefault("DBUser", "postgres")
+	viper.SetDefault("DBPassword", "admin")
+	viper.SetDefault("DBName", "database")
+
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Error("Error reading config file: %s, using default values or environment variables", zap.Error(err))
+	}
+
+	config := Config{
+		AppName:      viper.GetString("APP_NAME"),
+		Port:         viper.GetString("PORT"),
+		Debug:        viper.GetBool("DEBUG"),
+		Migration:    viper.GetBool("AUTO_MIGRATE"),
+		Seeder:       viper.GetBool("SEEDER"),
+		ProfitMargin: viper.GetFloat64("PROFIT_MARGIN"),
+		LowStock:     viper.GetInt("LOW_STOCK"),
+
+		Database: Database{
+			DBName:         viper.GetString("DB_NAME"),
+			DBHost:         viper.GetString("DB_HOST"),
+			DBPort:         viper.GetString("DB_PORT"),
+			DBUser:         viper.GetString("DB_USER"),
+			DBPassword:     viper.GetString("DB_PASSWORD"),
+			DBConnection:   viper.GetInt("DB_ConnectTimeOut"),
+			DBTimezone:     viper.GetString("DB_TIMEZONE"),
+			DBMaxIdleConst: viper.GetInt("DB_MAX_IDLE_CONNS"),
+			DBMaxOpenConst: viper.GetInt("DB_MAX_OPEN_CONNS"),
+			DBMaxIdleTime:  viper.GetInt("DB_MAX_IDLE_TIME"),
+			DBMaxLifeTime:  viper.GetInt("DB_MAX_LIFE_TIME"),
+		},
+
+		Redis: Redis{
+			Url:      viper.GetString("REDIS_URL"),
+			Password: viper.GetString("REDIS_PASSWORD"),
+			Prefix:   viper.GetString("REDIS_PREFIX"),
+		},
+	}
+
+	return config, nil
 }

@@ -6,7 +6,6 @@ import (
 	"project_pos_app/helper"
 	"project_pos_app/model"
 	"project_pos_app/service"
-	"project_pos_app/utils" // Import utils untuk JWT
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -49,7 +48,7 @@ func (auth *AuthHandler) Login(c *gin.Context) {
 
 	// 4. Generate JWT Token
 	secretKey := "secret-key" // Ambil dari environment untuk keamanan
-	token, err := utils.GenerateToken(uint(user.ID), user.Email, user.Role, secretKey)
+	token, err := helper.GenerateToken(uint(user.ID), user.Email, user.Role, secretKey)
 	if err != nil {
 		auth.Log.Error("Failed to generate token", zap.Error(err))
 		helper.Responses(c, http.StatusInternalServerError, "Failed to generate token", nil)

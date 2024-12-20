@@ -2,7 +2,6 @@ package helper
 
 import (
 	"net/http"
-	"project_pos_app/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +15,7 @@ func AuthMiddleware(secretKey string) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := utils.ValidateToken(token, secretKey)
+		claims, err := ValidateToken(token, secretKey)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
