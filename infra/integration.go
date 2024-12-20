@@ -1,13 +1,14 @@
 package infra
 
 import (
-	"project_pos_app/config"
+	// "project_pos_app/config"
 	"project_pos_app/controller"
 	"project_pos_app/database"
 	"project_pos_app/helper"
 	"project_pos_app/repository"
 	"project_pos_app/service"
 
+	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -56,4 +57,13 @@ func NewIntegrateContext() (*IntegrationContext, error) {
 		Ctl:   handler,
 		Cache: rdb,
 	}, nil
+}
+
+// InitRedis menginisialisasi Redis client
+func InitRedis(addr, password string, db int) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       db,
+	})
 }

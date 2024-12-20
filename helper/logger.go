@@ -3,7 +3,6 @@ package helper
 import (
 	"log"
 	"os"
-	"project_pos_app/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

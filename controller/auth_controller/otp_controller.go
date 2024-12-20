@@ -1,13 +1,13 @@
-package controllers
+package controller
 
 import (
-	"auth_jwt/services"
 	"net/http"
+	"project_pos_app/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateOTP(redisService *services.RedisService) gin.HandlerFunc {
+func ValidateOTP(redisService *service.RedisService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.Query("email")
 		otp := c.Query("otp")

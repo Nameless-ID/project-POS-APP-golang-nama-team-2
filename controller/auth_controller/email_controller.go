@@ -1,16 +1,10 @@
-package auth_controller
+package controller
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-type AuthHandler struct{}
-
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
-}
 
 func (h *AuthHandler) CheckEmail(c *gin.Context) {
 	// Ambil email dari query parameter

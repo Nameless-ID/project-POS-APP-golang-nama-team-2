@@ -2,25 +2,50 @@ package service
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
+	"errors"
 	"time"
-)
 
-var ctx = context.Background()
+	"github.com/go-redis/redis/v8"
+)
 
 type RedisService struct {
 	Client *redis.Client
 }
 
-func NewRedisService(addr string) *RedisService {
-	client := redis.NewClient(&redis.Options{Addr: addr})
+// NewRedisService membuat instance RedisService baru
+func NewRedisService(client *redis.Client) *RedisService {
 	return &RedisService{Client: client}
 }
 
-func (r *RedisService) Set(key, value string, expiration time.Time) error {
-	return r.Client.Set(ctx, key, value, expiration).Err()
+// Set menyimpan key-value pair ke Redis dengan masa berlaku tertentu
+func (r *RedisService) Set(key, value string, expiration time.Duration) error {
+	ctx := context.Background()
+	err := r.Client.Set(ctx, key, value, expiration).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
+// Get mengambil value berdasarkan key dari Redis
 func (r *RedisService) Get(key string) (string, error) {
-	return r.Client.Get(ctx, key).Result()
+	ctx := context.Background()
+	value, err := r.Client.Get(ctx, key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", nil // Key tidak ditemukan
+		}
+		return "", err // Error Redis lainnya
+	}
+	return value, nil
+}
+
+// Delete menghapus key dari Redis
+func (r *RedisService) Delete(key string) error {
+	ctx := context.Background()
+	err := r.Client.Del(ctx, key).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }

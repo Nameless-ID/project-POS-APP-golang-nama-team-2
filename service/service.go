@@ -18,7 +18,7 @@ type AllService struct {
 func NewAllService(repo *repository.AllRepository, log *zap.Logger) *AllService {
 	return &AllService{
 		Example: exampleservice.NewExampleService(repo, log),
-		Auth:    authservice.NewManagementVoucherService(repo, log),
+		Auth:    authservice.AuthService(repo, log),
 		Notif:   notifservice.NewNotifService(repo, log),
 	}
 }
