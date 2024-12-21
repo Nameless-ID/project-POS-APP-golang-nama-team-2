@@ -34,12 +34,15 @@ func AuthRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
 }
 
 func StaffRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
-	notifRoute := r.Group("/api/staff-management")
-	{
-		staffRoute.POST("/add", ctx.Ctl.Staff)
-		staffRoute.GET("/list", ctx.Ctl.Staff)
-		staffRoute.DELETE("/:id", ctx.Ctl.Staff)
-	}
+	staffController := controller.NewStaffController(staffService, logger)
+
+	// Setup routes
+	router := gin.Default()
+	router.GET("/staffs", staffController.GetAllStaff)
+	router.GET("/staffs/:id", staffController.GetStaffByID)
+	router.POST("/staffs", staffController.CreateStaff)
+	router.PUT("/staffs/:id", staffController.UpdateStaff)
+	router.DELETE("/staffs/:id", staffController.DeleteStaff)
 }
 func NotificationRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
 	notifRoute := r.Group("/api/notifications")
