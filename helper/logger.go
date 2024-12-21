@@ -44,3 +44,9 @@ func InitLog(cfg config.Config) (*zap.Logger, error) {
 
 	return logger, nil
 }
+
+func LogError(message string, err error) {
+	logger, _ := zap.NewProduction() // Gunakan logger dengan level production
+	defer logger.Sync()
+	logger.Error(message, zap.Error(err))
+}

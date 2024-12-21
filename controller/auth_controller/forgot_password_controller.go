@@ -2,19 +2,29 @@ package controller
 
 import (
 	"context"
-	"net/http"
-	"project_pos_app/helper"
-	// "time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
+	"net/http"
+	"project_pos_app/helper"
+	"project_pos_app/model"
+	service "project_pos_app/service/auth_service"
 )
 
+type User = model.User
+
+// ResetPasswordRequest struct untuk menangani input reset password
 type ResetPasswordRequest struct {
 	Email       string `json:"email" binding:"required,email"`
 	NewPassword string `json:"new_password" binding:"required,min=8"`
 	Token       string `json:"token" binding:"required"`
+}
+
+// AuthHandler menangani proses autentikasi, termasuk reset password
+type PasswordHandler struct {
+	RedisClient *redis.Client
+	DB          *gorm.DB
+	// Password    *service.AuthService
 }
 
 // ResetPassword menangani permintaan reset password
@@ -46,8 +56,8 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	// Update password di database
-	err = h.updatePassword(req.Email, hashedPassword)
+	// Panggil PasswordService untuk mengupdate password
+	err = h.passwordService.UpdatePassword(req.Email, hashedPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
@@ -79,18 +89,4 @@ func (h *AuthHandler) validateResetToken(email, token string) (bool, error) {
 
 	// Periksa kecocokan token
 	return storedToken == token, nil
-}
-
-// updatePassword memperbarui password di database
-func (h *AuthHandler) updatePassword(email, hashedPassword string) error {
-	// Update password dengan GORM
-	result := h.DB.Model(&User{}).Where("email = ?", email).Update("password", hashedPassword)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound // Email tidak ditemukan
-	}
-	return nil
 }

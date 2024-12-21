@@ -1,23 +1,38 @@
 package controller
 
 import (
-	"net/http"
-	"project_pos_app/service"
+	"fmt"
+	"net/smtp"
+	"os"
 
-	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
-func ValidateOTP(redisService *service.RedisService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		email := c.Query("email")
-		otp := c.Query("otp")
-
-		savedOTP, err := redisService.Get(email)
-		if err != nil || savedOTP != otp {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid OTP"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "OTP is valid"})
+// Load .env file
+func init() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Error loading .env file")
 	}
+}
+
+// Kirim OTP ke email
+func sendOTPEmail(to, otp string) error {
+	// Ambil konfigurasi SMTP dari environment variables
+	from := os.Getenv("SMTP_EMAIL")
+	passwordEmail := os.Getenv("SMTP_PASSWORD")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+
+	// Subjek dan body email
+	subject := "Your OTP Code"
+	body := fmt.Sprintf("Hello,\n\nYour OTP code is: %s\n\nRegards,\nYour Team", otp)
+	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
+
+	// Kirim email
+	auth := smtp.PlainAuth("", from, passwordEmail, smtpHost)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, []byte(message))
+	if err != nil {
+		return err
+	}
+	return nil
 }

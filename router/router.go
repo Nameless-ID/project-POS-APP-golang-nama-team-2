@@ -19,29 +19,13 @@ func NewRoutes(ctx *infra.IntegrationContext) *gin.Engine {
 
 	// Notification Routes
 	NotificationRoutes(r, ctx)
-<<<<<<< HEAD
-
-=======
-	RevenueRoutes(r, ctx)
-	ProductRoutes(r, ctx)
-
-	order := r.Group("/order")
-	{
-		order.GET("/", ctx.Ctl.Order.GetAllOrder)
-		order.GET("/table", ctx.Ctl.Order.GetAllTable)
-		order.GET("/payment", ctx.Ctl.Order.GetAllPayment)
-		order.POST("/", ctx.Ctl.Order.CreateOrder)
-		order.PUT("/:id", ctx.Ctl.Order.UpdateOrder)
-		order.DELETE("/:id", ctx.Ctl.Order.DeleteOrder)
-	}
-  
->>>>>>> 49b906e66dc3cb6e6caeb8d4a7770ca7af048c43
 	return r
 }
 
 func AuthRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
 	authRoute := r.Group("/api/auth")
 	{
+
 		authRoute.POST("/login", ctx.Ctl.Auth.Login)                  // Login
 		authRoute.GET("/check-email", ctx.Ctl.Auth.CheckEmail)        // Check Email
 		authRoute.GET("/validate-otp", ctx.Ctl.Auth.ValidateOTP)      // Validate OTP
@@ -49,6 +33,14 @@ func AuthRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
 	}
 }
 
+func StaffRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
+	notifRoute := r.Group("/api/staff-management")
+	{
+		staffRoute.POST("/add", ctx.Ctl.Staff)
+		staffRoute.GET("/list", ctx.Ctl.Staff)
+		staffRoute.DELETE("/:id", ctx.Ctl.Staff)
+	}
+}
 func NotificationRoutes(r *gin.Engine, ctx *infra.IntegrationContext) {
 	notifRoute := r.Group("/api/notifications")
 	{
